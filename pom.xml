@@ -66,15 +66,10 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- AWS SDK for Java (S3 and Presigner) -->
+        <!-- AWS SDK for Java (S3, includes S3Presigner) -->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>s3</artifactId>
-            <version>2.20.162</version>
-        </dependency>
-        <dependency>
-            <groupId>software.amazon.awssdk</groupId>
-            <artifactId>s3-presigner</artifactId>
             <version>2.20.162</version>
         </dependency>
     </dependencies>
