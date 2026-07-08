@@ -64,7 +64,7 @@ public class MembershipPlanController{
             plan.setPrice(req.getPrice());
             plan.setDuration(req.getDuration());
             plan.setBenefits(req.getBenefits());
-            return ResponseEntity.ok(planService.savePlan(plan));
+            return ResponseEntity.ok(planService.savePlan(plan));   
         }).orElse(ResponseEntity.notFound().build());
     }
 

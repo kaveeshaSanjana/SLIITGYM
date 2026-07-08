@@ -50,12 +50,12 @@ public class InstructorService {
      */
     @Transactional
     public Instructor saveInstructor(Instructor instructor) {
-        // Check for duplicate email only when creating a NEW instructor (not updating)
-        if (instructor.getId() != null && !instructorRepository.existsById(instructor.getId())) {
-            userRepository.findByEmail(instructor.getEmail()).ifPresent(existing -> {
+        // Check for duplicate email when creating a new instructor OR updating an existing instructor with a different email
+        userRepository.findByEmail(instructor.getEmail()).ifPresent(existing -> {
+            if (instructor.getId() == null || !existing.getId().equals(instructor.getId())) {
                 throw new DuplicateResourceException("A user with email '" + instructor.getEmail() + "' already exists");
-            });
-        }
+            }
+        });
         return instructorRepository.save(instructor);
     }
 

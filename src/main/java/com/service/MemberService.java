@@ -80,14 +80,12 @@ public class MemberService {
      */
     @Transactional
     public Member saveMember(Member member) {
-        //deetle
-        //payemtn
-        // Check for duplicate email only when creating a NEW member (not updating)
-        if (member.getId() != null && !memberRepository.existsById(member.getId())) {
-            userRepository.findByEmail(member.getEmail()).ifPresent(existing -> {
+        // Check for duplicate email when creating a new member OR updating an existing member with a different email
+        userRepository.findByEmail(member.getEmail()).ifPresent(existing -> {
+            if (member.getId() == null || !existing.getId().equals(member.getId())) {
                 throw new DuplicateResourceException("A user with email '" + member.getEmail() + "' already exists");
-            });
-        }
+            }
+        });
         return memberRepository.save(member);
     }
 

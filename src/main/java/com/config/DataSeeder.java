@@ -38,8 +38,10 @@ public class DataSeeder implements CommandLineRunner {
     private final AttendanceRepository attendanceRepository;
     private final HealthRecordRepository healthRecordRepository;
     private final DoorDeviceRepository doorDeviceRepository;
+    private final EquipmentRepository equipmentRepository;
+    private final EquipmentActivityRepository equipmentActivityRepository;
 
-    public DataSeeder(UserRepository userRepository, MemberRepository memberRepository, InstructorRepository instructorRepository, MembershipPlanRepository planRepository, WorkoutClassRepository classRepository, PaymentRepository paymentRepository, AttendanceRepository attendanceRepository, HealthRecordRepository healthRecordRepository, DoorDeviceRepository doorDeviceRepository) {
+    public DataSeeder(UserRepository userRepository, MemberRepository memberRepository, InstructorRepository instructorRepository, MembershipPlanRepository planRepository, WorkoutClassRepository classRepository, PaymentRepository paymentRepository, AttendanceRepository attendanceRepository, HealthRecordRepository healthRecordRepository, DoorDeviceRepository doorDeviceRepository, EquipmentRepository equipmentRepository, EquipmentActivityRepository equipmentActivityRepository) {
         this.userRepository = userRepository;
         this.memberRepository = memberRepository;
         this.instructorRepository = instructorRepository;
@@ -49,6 +51,8 @@ public class DataSeeder implements CommandLineRunner {
         this.attendanceRepository = attendanceRepository;
         this.healthRecordRepository = healthRecordRepository;
         this.doorDeviceRepository = doorDeviceRepository;
+        this.equipmentRepository = equipmentRepository;
+        this.equipmentActivityRepository = equipmentActivityRepository;
     }
 
     /**
@@ -59,6 +63,9 @@ public class DataSeeder implements CommandLineRunner {
      */
     @Override
     public void run(String... args) {
+        // Seed equipment and activities if they are empty
+        seedEquipmentAndActivities();
+
         if (userRepository.count() > 0) {
             return; // Data already seeded
         }
@@ -289,6 +296,72 @@ public class DataSeeder implements CommandLineRunner {
         record.setWorkingTime(workingTime);
         record.setCaloriesBurned(caloriesBurned);
         return record;
+    }
+
+    private void seedEquipmentAndActivities() {
+        if (equipmentRepository.count() > 0) return;
+
+        Equipment eq1 = new Equipment("eq1", "Treadmill Pro-1", "Cardio", EquipmentStatus.ACTIVE, "Cardio Zone");
+        equipmentRepository.save(eq1);
+
+        Equipment eq2 = new Equipment("eq2", "Elliptical Trainer", "Cardio", EquipmentStatus.ACTIVE, "Cardio Zone");
+        equipmentRepository.save(eq2);
+
+        Equipment eq3 = new Equipment("eq3", "Dumbbell Station 1", "Strength", EquipmentStatus.ACTIVE, "Free Weights");
+        equipmentRepository.save(eq3);
+
+        Equipment eq4 = new Equipment("eq4", "Barbell Bench Press", "Strength", EquipmentStatus.ACTIVE, "Free Weights");
+        equipmentRepository.save(eq4);
+
+        Equipment eq5 = new Equipment("eq5", "Leg Press Machine", "Strength", EquipmentStatus.ACTIVE, "Strength Machine Zone");
+        equipmentRepository.save(eq5);
+
+        Equipment eq6 = new Equipment("eq6", "Cable Crossover", "Strength", EquipmentStatus.ACTIVE, "Strength Machine Zone");
+        equipmentRepository.save(eq6);
+
+        List<Member> members = memberRepository.findAll();
+        if (members.isEmpty()) return;
+
+        Member m1 = members.get(0);
+        Member m2 = members.size() > 1 ? members.get(1) : m1;
+
+        List<EquipmentActivity> eqActivities = Arrays.asList(
+            new EquipmentActivity("act1", eq1, m1, "2026-07-06", "08:00:00", "08:45:00"),
+            new EquipmentActivity("act2", eq3, m1, "2026-07-06", "09:00:00", "10:00:00"),
+            new EquipmentActivity("act3", eq4, m1, "2026-07-07", "17:00:00", "18:00:00"),
+            new EquipmentActivity("act4", eq5, m1, "2026-07-07", "18:10:00", "18:55:00"),
+            new EquipmentActivity("act5", eq1, m1, "2026-07-05", "07:30:00", "08:20:00"),
+            
+            new EquipmentActivity("act6", eq2, m2, "2026-07-06", "09:30:00", "10:15:00"),
+            new EquipmentActivity("act7", eq5, m2, "2026-07-06", "10:30:00", "11:20:00"),
+            new EquipmentActivity("act8", eq3, m2, "2026-07-07", "18:00:00", "18:55:00"),
+            new EquipmentActivity("act9", eq6, m2, "2026-07-05", "19:00:00", "19:50:00")
+        );
+        equipmentActivityRepository.saveAll(eqActivities);
+
+        // Seed matching attendance for local members
+        List<Attendance> matchingAtt = Arrays.asList(
+            new Attendance("att_m1_5", m1, "2026-07-05", "07:30", "08:30", 80.0),
+            new Attendance("att_m1_6", m1, "2026-07-06", "08:00", "10:15", 80.0),
+            new Attendance("att_m1_7", m1, "2026-07-07", "17:00", "19:15", 80.0),
+            
+            new Attendance("att_m2_5", m2, "2026-07-05", "19:00", "20:00", 78.0),
+            new Attendance("att_m2_6", m2, "2026-07-06", "09:30", "11:30", 78.0),
+            new Attendance("att_m2_7", m2, "2026-07-07", "18:00", "19:15", 78.0)
+        );
+        attendanceRepository.saveAll(matchingAtt);
+
+        // Seed matching health records for local members
+        List<HealthRecord> matchingHealth = Arrays.asList(
+            createHealthRecord("h_m1_5", m1, "2026-07-05", 180, 80, 50, 300),
+            createHealthRecord("h_m1_6", m1, "2026-07-06", 180, 80, 105, 630),
+            createHealthRecord("h_m1_7", m1, "2026-07-07", 180, 80, 105, 630),
+            
+            createHealthRecord("h_m2_5", m2, "2026-07-05", 175, 78, 50, 300),
+            createHealthRecord("h_m2_6", m2, "2026-07-06", 175, 78, 95, 570),
+            createHealthRecord("h_m2_7", m2, "2026-07-07", 175, 78, 55, 330)
+        );
+        healthRecordRepository.saveAll(matchingHealth);
     }
 }
 
